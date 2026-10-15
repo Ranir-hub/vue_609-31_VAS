@@ -1,7 +1,10 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
 import axios from "axios";
 import VProduct from './VProduct.vue';
+import SearchInput from './SearchInput.vue';
+import SortSelect from './SortSelect.vue';
+
 const items = ref([]);
 const fetchItems = async () => {
   try{
@@ -20,8 +23,21 @@ const fetchItems = async () => {
 onMounted(async () => {
   await fetchItems();
 })
+
 const searchQuery = ref('');
-const sortBy = ref('default');
+const sortOptions = [
+    { value: "default", label: "По умолчанию" },
+    { value: "price-asc", label: "Сначала дешевые" },
+    { value: "price-desc", label: "Сначала дорогие" },
+    { value: "name-asc", label: "Название (А-Я)" },
+    { value: "name-desc", label: "Название (Я-А)" },
+]
+
+const sortBy = ref(localStorage.getItem('shop_sort_by') || 'default');
+
+watch(sortBy, (newValue) => {
+    localStorage.setItem('shop_sort_by', newValue);
+});
 
 const filteredProducts = computed(() => {
     let result=[...items.value];
@@ -50,25 +66,16 @@ const filteredProducts = computed(() => {
 });
 </script>
 <template>
+    <main class="pt-10">
     <div class="flex justify-between">
         <h1 class="text-[40px] font-bold mb-5">Каталог</h1>
         <div class="flex items-center gap-3 mb-4">
-            <div class="flex items-center border px-3 gap-2 bg-white border-gray-500/30 h-[52px] rounded-md">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M11.5 21.75C5.85 21.75 1.25 17.15 1.25 11.5C1.25 5.85 5.85 1.25 11.5 1.25C17.15 1.25 21.75 5.85 21.75 11.5C21.75 17.15 17.15 21.75 11.5 21.75ZM11.5 2.75C6.67 2.75 2.75 6.68 2.75 11.5C2.75 16.32 6.67 20.25 11.5 20.25C16.33 20.25 20.25 16.32 20.25 11.5C20.25 6.68 16.33 2.75 11.5 2.75Z" fill="#A1ABB9"/><path d="M21.9999 22.75C21.8099 22.75 21.6199 22.68 21.4699 22.53L19.4699 20.53C19.1799 20.24 19.1799 19.76 19.4699 19.47C19.7599 19.18 20.2399 19.18 20.5299 19.47L22.5299 21.47C22.8199 21.76 22.8199 22.24 22.5299 22.53C22.3799 22.68 22.1899 22.75 21.9999 22.75Z" fill="#A1ABB9"/></svg>
-                <input 
-                    v-model="searchQuery" 
-                    type="text" placeholder="Поиск товаров" 
-                    class="w-full h-full outline-none text-gray-500 placeholder-gray-500 text-sm"/>
-                <button v-if="searchQuery" @click="searchQuery = ''" class="cursor-pointer">&times;</button>
-            </div>
-            <select v-model="sortBy" class="flex items-center border pl-3 gap-2 bg-white border-gray-500/30 h-[52px] rounded-md outline-none">
-                <option value="default">По умолчанию</option>
-                <option value="price-asc">Сначала дешевые</option>
-                <option value="price-desc">Сначала дорогие</option>
-                <option value="name-asc">Название (А-Я)</option>
-                <option value="name-desc">Название (Я-А)</option>
-            </select>
+            <search-input 
+                v-model="searchQuery"
+                placeholder="Поиск по названию..."/>
+            <sort-select
+                v-model="sortBy"
+                :options="sortOptions"/>
         </div>
     </div>
     <div class="grid grid-cols-5 gap-5">
@@ -81,4 +88,5 @@ const filteredProducts = computed(() => {
         ></v-product>
         <p v-if="filteredProducts.length === 0">Товары не найдены</p>
     </div>
+    </main>
 </template>

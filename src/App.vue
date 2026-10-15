@@ -1,5 +1,5 @@
 <script setup>
-import ProductList from './components/ProductList.vue';
+import VCatalog from './components/VCatalog.vue';
 </script>
 
 <template>
@@ -42,7 +42,7 @@ import ProductList from './components/ProductList.vue';
           </ul>
         </div>
       </nav>
-      <product-list></product-list>
+      <v-catalog/>
     </div>
     <footer class="p-6 bg-slate-100">
       <div class="text-center text-slate-500">
